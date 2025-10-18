@@ -1,3 +1,48 @@
+// === Helpers (paste once) ===
+
+// Quick UUID v4 (works in all modern browsers)
+const eid = () => (crypto.randomUUID ? crypto.randomUUID() :
+  "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, c => {
+    const r = crypto.getRandomValues(new Uint8Array(1))[0] & 15;
+    const v = c === "x" ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  })
+);
+
+// Seconds since epoch
+const now = () => Math.floor(Date.now() / 1000);
+
+// Read Meta cookies (for better match quality)
+const getCookie = (n) => (document.cookie.match('(^|;)\\s*'+n+'\\s*=\\s*([^;]+)') || [])[2] || null;
+
+// Build a basic payload (edit values as you like)
+function makePayload({ name="Purchase", value=1999, currency="INR", contents=[{id:"SKU123",quantity:1}], testCode=null } = {}) {
+  return {
+    event_name: name,
+    event_id: eid(),
+    event_time: now(),
+    event_source_url: location.href,
+    client_user_agent: navigator.userAgent,
+    fbp: getCookie("_fbp"),
+    fbc: getCookie("_fbc"),
+    user: { email: "test@example.com" }, // if you know the email in-page, you can fill it
+    custom_data: { currency, value, contents, content_type: "product" },
+    ...(testCode ? { test_event_code: testCode } : {})
+  };
+}
+
+// One-liner sender
+async function sendToCapi(body) {
+  const r = await fetch("https://megaska-capi.vercel.app/api/meta-capi", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    keepalive: true,
+    body: JSON.stringify(body)
+  });
+  const j = await r.json().catch(()=>({}));
+  console.log("CAPI status:", r.status, j);
+}
+
 import crypto from "crypto"; // keep imports at the very top
 
 // Allowed origins for browser calls (add any others you really use)
