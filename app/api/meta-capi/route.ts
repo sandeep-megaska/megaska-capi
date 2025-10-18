@@ -1,4 +1,19 @@
 // app/api/meta-capi/route.ts
+const ALLOWED = new Set(["https://megaska.com","https://www.megaska.com"]);
+function corsHeaders(origin: string | null) {
+  const o = origin && ALLOWED.has(origin) ? origin : "";
+  return {
+    "Access-Control-Allow-Origin": o || "",
+    "Access-Control-Allow-Headers": "content-type",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Vary": "Origin",
+  };
+}
+export async function OPTIONS(req: Request) {
+  return new Response(null, { headers: corsHeaders(req.headers.get("Origin")) });
+}
+// In POST return responses, spread ...corsHeaders(req.headers.get("Origin"))
+
 import crypto from "crypto";
 
 const FB_GRAPH = "https://graph.facebook.com/v19.0";
