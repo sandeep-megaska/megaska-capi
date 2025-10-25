@@ -1,3 +1,18 @@
+
+const GA4_MEASUREMENT_ID = process.env.GA4_MEASUREMENT_ID;
+const GA4_API_SECRET = process.env.GA4_API_SECRET;
+
+async function sendGA4(event_name, event_id, params) {
+  await fetch(`https://www.google-analytics.com/mp/collect?measurement_id=${GA4_MEASUREMENT_ID}&api_secret=${GA4_API_SECRET}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      client_id: crypto.randomUUID(),
+      events: [{ name: event_name, params }]
+    })
+  });
+}
+
 // === Helpers (paste once) ===
 
 // Quick UUID v4 (works in all modern browsers)
